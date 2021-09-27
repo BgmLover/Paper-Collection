@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage{subfiles}
+\usepackage{amsmath}
+\newcommand{\smalltitle}[1]{\noindent \textbf{#1}}
+\title{Papers about inference for adaptive-collected data }
+
+\begin{document}
+\maketitle
+
+\section{Post-Contextual-Bandit Inference}
+\subsection{Short story}
+I have some adaptive-collected data $(X_t,Y_t,A_t)$ and the corresponding adaptive policy $g_t$. 
+Now I try to evaluate some target (a policy, treatment effect) using a function $g^*(a|x)$. 
+
+I know I can use importance sampling to get an unbiased estimator like IPW (inverse propensity weighted) and its advanced DR (double robust).
+But many experiments have shown that they are not asymptotically normal, which means that I cannot easily construct a confidence interval 
+with a specified confidence level.
+
+OK is there any solution in the literature? Yes, some work proposes a so-called stabilized estimator, 
+which divides each term of estimator by its conditional standard deviation based on the history.
+Such trick has been applied in the non-contextual bandit setting, so ths work deals with the contextual setting.
+
+The main difficulty may be the construction of the estimator of conditional standard deviation.
+
+\subsection{Simple formulation}
+The outcome at time $t$ is $O(t)=(X(t),A(t),Y(t))$ corresponding to context, action and reward.
+
+The action $A_t$ is drawn from a known policy $g_t$, which is $O(1),O(2),\dots,O(t-1)$-measurable.
+
+$X(t)$ and $Y(t)$ have their own but unknown time-independent distributions which are $Q_{0,X}, Q_{0,Y}(\cdot|A,X)$.
+
+Evaluation target:
+\begin{equation}
+    \Psi(Q_X,Q_Y)=\int y Q_X(dx) g^*(a|x) d\mu_A(a) Q_Y(dy|a,x),
+\end{equation}
+Note that $g^*$ is irrelevant to policy $g_t$, terrible notation. $|g^*(a|x)| \leq G$ for any $x,a$.
+
+Of course, we can simplify the calculation about $Y$:
+\begin{equation}
+    \bar{Q}_0(a,x)=E_{Q_{0,Y}}(\cdot|x,a)[Y] = \int y Q_{0,Y}(dy|a,x)
+\end{equation}
+
+So we can rewrite 
+\begin{equation}
+    \Psi(Q_X,\bar{Q})=\int \bar{Q}(a,x) Q_X(dx) g^*(a|x) d\mu_A(a),
+\end{equation}
+
+Now we can introduce the basic DR estimator:
+
+\begin{equation}
+    D^\prime(g,\bar{Q})(x,a,y)= \frac{g^*(a|x)}{g(a|x)}(y-\bar{Q}(a,x))+ \int \bar{Q}(a^\prime,x)g^*(a^\prime|x) d\mu_A a^\prime
+\end{equation}
+
+What is canonical gradient?
+
+\begin{equation}
+    D = D^\prime - \Psi    
+\end{equation}
+
+For convenience, define an integration operator
+\begin{equation}
+    P_{Q,g} f = \int f(x,a,y) Q_X(dx) g(a|x) d\mu_A(a) Q_Y(dy|a,x)
+\end{equation}
+when g is $O(1),\dots, O(t-1)$-measurable, then just replace the expectation with conditional expectation.
+
+
+\subsection{Proof sketch}
+2 steps: how to show the asymptotic normality and how to construct a consistent estimator of conditional standard deviation.
+
+
+\smalltitle{Asymptotic normal estimator}
+
+Stabilized estimator:
+\begin{equation}
+    \hat{\Psi}_T = (\frac{1}{T}\sum^T_{t=1}\hat{\sigma}_t^{-1})^{-1} \frac{1}{T} \sum_{t=1}^T\hat{\sigma}_t^{-1}D^\prime(g,\hat{\bar{Q}}_{t-1})
+\end{equation}
+
+How to show it?
+
+\begin{enumerate}
+    \item construct a martingale difference sequence (MDS): 
+    
+    $Z_{t,T}=T^{-\frac{1}{2}}[\hat{\sigma}_t^{-1}D^\prime(O(t))-P_{Q_0,g_t}\hat{\sigma}_t^{-1}D^\prime(O(t))]$
+
+    Note that RHS is the conditional expectation of LHS.
+    \item For such martingale triangular array, the target is to use Lindeberg condition to prove the CLT, so just need to prove the condition is satisfied.
+    \begin{itemize}
+        \item Show that sum of variances of $Z_{t,T}$ is convergent. (Use assumption that $\hat{\sigma}_t$ is consistent and non degenerate efficiency bound) 
+        \item Lindeberg's condition: $\sum_{t=1}^T E[Z_{t,T}^2 1(Z_{t,T}\geq \epsilon)] \xrightarrow{p}0$.
+        $Z_{t,T}=O(\delta_t^{-1}T^{-1/2}\hat{\sigma}_t^{-1})$, $\delta_t \geq Ct^{-1/2}$(assumption), 
+    \end{itemize}
+
+\end{enumerate}
+
+
+\end{document}
+
