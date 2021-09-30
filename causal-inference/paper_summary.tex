@@ -92,6 +92,16 @@ How to show it?
 
 \end{enumerate}
 
+\smalltitle{Construct a consistent estimator}
 
+Now from the previous argument, the key step is to construct $\hat{\sigma}_t$:
+recall that the $\sigma_{0,t}$ is the conditional standard deviation of $D^\prime(O(t))$.
+Their idea is simply using the classical $Var(X)=E[X^2]-E^2[x]$ and replace the expectation with sample average.
+
+\begin{equation}
+    \hat{\sigma}_t = \frac{1}{t-1} \sum^{t-1}_{s=1} \frac{g_t(A(s)|X(s))}{g_s(A(s))|X(s)}(D^\prime_{s,t})^2 - (\frac{1}{t-1} \sum^{t-1}_{s=1} \frac{g_t(A(s)|X(s))}{g_s(A(s))|X(s)}D^\prime_{s,t})^2
+\end{equation}
+
+Next is decompose the difference and leverage the authors' previous work maximal inequality for IS weighted martingale process.
 \end{document}
 
